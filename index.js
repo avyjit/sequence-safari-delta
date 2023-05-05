@@ -48,11 +48,13 @@ const R_ERR = -1;
 const R_ERR_OPPOSITE_DIRECTION = 1;
 const R_SNAKE_UPDATE_SUCCESSFUL = 2;
 const R_ERR_HIT_BOUNDARY = 3;
+const R_ERR_EAT_ITSELF = 4;
 
 class Snake {
     constructor() {
         this.coords = defaultSnakePosition();
         this.direction = D_DOWN;
+        this.shouldGrow = false;
     }
 
     clear() {
@@ -105,8 +107,18 @@ class Snake {
             return R_ERR_HIT_BOUNDARY;
         }
 
+        if (!this.shouldGrow) {
+            this.coords.pop();
+        } else {
+            this.shouldGrow = false;
+        }
+
+        if (this.isGonnaEatItself(newHead)) {
+            return R_ERR_EAT_ITSELF;
+        }
+
         this.coords.unshift(newHead);
-        this.coords.pop();
+
 
         this.direction = direction;
 
@@ -119,6 +131,21 @@ class Snake {
 
     get head() {
         return this.coords[0];
+    }
+
+    grow() {
+        this.shouldGrow = true;
+    }
+
+    isGonnaEatItself(newHead) {
+        for (let i=0; i < this.coords.length; ++i) {
+            if (this.coords[i][0] === newHead[0] && this.coords[i][1] === newHead[1]) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 
 }
@@ -287,10 +314,15 @@ class GameLoop {
             return this.gameEnd();
         }
 
+        if (ret === R_ERR_EAT_ITSELF) {
+            console.log("Eat itself!");
+            return this.gameEnd();
+        }
+
         if (this.spawnManager.isSnakeColliding(this.snake)) {
             crunch.load();
             crunch.play();
-            
+            this.snake.grow();
             this.scoreManager.incrementScore();
             this.spawnManager.spawnNewFood(this.snake);
         }
