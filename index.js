@@ -344,3 +344,9 @@ resetBtn.addEventListener('click', () => {
     loop.reset();
     resetBtn.style.visibility = 'hidden';
 });
+
+// On screen controls for mobile users
+document.getElementById('up').addEventListener('click', () => loop.addDirectionToQueue(D_UP));
+document.getElementById('right').addEventListener('click', () => loop.addDirectionToQueue(D_RIGHT));
+document.getElementById('down').addEventListener('click', () => loop.addDirectionToQueue(D_DOWN));
+document.getElementById('left').addEventListener('click', () => loop.addDirectionToQueue(D_LEFT));
