@@ -1,0 +1,22 @@
+.scorebar {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 48px;
+
+    display: flex;
+    justify-content: space-around;
+}
+
+#gridbox {
+    display: flex;
+    flex-direction: column;
+}
+
+.gridrow {
+    display: flex;
+}
+
+.gridcell {
+    border: 1px solid black;
+    height: 32px;
+    width: 32px;
+  }
