@@ -310,7 +310,3 @@ resetBtn.addEventListener('click', () => {
     loop.reset();
     resetBtn.style.visibility = 'hidden';
 });
-
-// let interval = setInterval(() => {
-//     loop.tick();
-// }, TICK_INTERVAL_MS);

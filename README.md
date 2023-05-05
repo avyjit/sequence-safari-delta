@@ -16,8 +16,8 @@
 -   [x] Implement a suitable scoring system
 -   [ ] Implement a time system: the game continues as long as there is time on the clock. When completing a sequence of blocks, the player gains time.
 -   [ ] Make the game mobile responsive
--   [x] Implement onscreen direction control to steer the snake
--   [ ] Implement a leaderboard system using local storage
+-   [ ] Implement onscreen direction control to steer the snake
+-   [x] Implement a leaderboard system using local storage
 
 ### HackerMode
 
