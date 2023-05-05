@@ -27,12 +27,7 @@ function defaultSnakePosition() {
     return snake;
 }
 
-function drawSnake() {
-    for (let i=0; i < snake.length; ++i) {
-        const cell = document.getElementById(`cell_${snake[i][0]}_${snake[i][1]}`);
-        cell.className = 'gridcell snake';
-    }
-}
+
 
 const D_UP = 0;
 const D_RIGHT = 1;
@@ -42,12 +37,24 @@ const D_LEFT = 3;
 const R_OK = 0;
 const R_ERR = -1;
 const R_ERR_OPPOSITE_DIRECTION = 1;
+const R_SNAKE_UPDATE_SUCCESSFUL = 2;
 
-let direction = D_DOWN;
-let snake = defaultSnakePosition();
+
+let globalState = {
+    direction: D_DOWN,
+    snake: defaultSnakePosition(),
+};
+
+function drawSnake() {
+    const snake = globalState.snake;
+    for (let i=0; i < globalState.snake.length; ++i) {
+        const cell = document.getElementById(`cell_${snake[i][0]}_${snake[i][1]}`);
+        cell.className = 'gridcell snake';
+    }
+}
 
 function updateSnakePosition(new_direction, old_direction) {
-    const head = snake[0];
+    const head = globalState.snake[0];
     let newHead = [head[0], head[1]];
 
     // Check if the snake is going in the opposite direction
@@ -68,12 +75,15 @@ function updateSnakePosition(new_direction, old_direction) {
         default: return R_ERR;
     }
 
-    snake.unshift(newHead);
-    snake.pop();
+    globalState.snake.unshift(newHead);
+    globalState.snake.pop();
+
+    return R_SNAKE_UPDATE_SUCCESSFUL;
 }
 
 function clearCurrentSnake() {
-    for (let i=0; i < snake.length; ++i) {
+    const snake = globalState.snake;
+    for (let i=0; i < globalState.snake.length; ++i) {
         const cell = document.getElementById(`cell_${snake[i][0]}_${snake[i][1]}`);
         cell.className = 'gridcell';
     }
@@ -81,26 +91,28 @@ function clearCurrentSnake() {
 
 drawSnake();
 
+function handleDirectionChange(newDirection) {
+    clearCurrentSnake();
+    const ret = updateSnakePosition(newDirection, globalState.direction);
+    drawSnake();
+
+    if (ret !== R_ERR_OPPOSITE_DIRECTION) {
+        globalState.direction = newDirection;
+    }
+}
 
 
 document.addEventListener('keydown', (event) => {
     const keyName = event.key;
-    let newDirection = direction;
-    let wasDirectionChanged = true;
 
     switch (keyName) {
-        case 'ArrowUp': newDirection = D_UP; break;
-        case 'ArrowRight': newDirection = D_RIGHT; break;
-        case 'ArrowDown': newDirection = D_DOWN; break;
-        case 'ArrowLeft': newDirection = D_LEFT; break;
-        default: wasDirectionChanged = false;
+
+        case 'ArrowUp': handleDirectionChange(D_UP); break;
+        case 'ArrowRight': handleDirectionChange(D_RIGHT); break;
+        case 'ArrowDown': handleDirectionChange(D_DOWN); break;
+        case 'ArrowLeft': handleDirectionChange(D_LEFT); break;
+        default: break;
     }
 
-    clearCurrentSnake();
-    const ret = updateSnakePosition(newDirection, direction);
-    drawSnake();
 
-    if (ret !== R_ERR_OPPOSITE_DIRECTION && wasDirectionChanged) {
-        direction = newDirection;
-    }
 });
