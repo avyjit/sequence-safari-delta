@@ -217,7 +217,7 @@ class ScoreManager {
         this.score = 0;
         this.renderScore();
         clearInterval(this.interval);
-        this.countdown = 15;
+        this.countdown = STARTING_COUNTDOWN_TIMER;
         this.renderCountdown();
     }
 
