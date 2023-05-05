@@ -261,7 +261,11 @@ class GameLoop {
             // return;
         }
 
-        this.queue.unshift(event);
+        this.queue.unshift(dir);
+    }
+
+    addDirectionToQueue(dir) {
+        this.queue.unshift(dir);
     }
 
     tick() {
@@ -272,14 +276,8 @@ class GameLoop {
         if (this.queue.length === 0) {
             ret = this.snake.updatePosition(null);
         } else {
-            let event = this.queue.pop();
-            switch (event.key) {
-                case 'ArrowUp': ret = this.snake.updatePosition(D_UP); break;
-                case 'ArrowRight': ret = this.snake.updatePosition(D_RIGHT); break;
-                case 'ArrowDown': ret = this.snake.updatePosition(D_DOWN); break;
-                case 'ArrowLeft': ret = this.snake.updatePosition(D_LEFT); break;
-                default: break;
-            }
+            let dir = this.queue.pop();
+            this.snake.updatePosition(dir);
         }
 
         if (ret === R_ERR_OPPOSITE_DIRECTION) { console.log("Opposite direction detected!"); }

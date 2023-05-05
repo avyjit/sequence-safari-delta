@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 85vh;
+    height: 75vh;
 }
 
 #gridbox {
@@ -42,7 +42,7 @@
     justify-content: space-around;
   }
 
-  #reset {
+  .btn {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 1.5rem;
     background-color: blue;
@@ -50,9 +50,28 @@
 
     border: none;
     border-radius: 2px;
+    margin: 5px;
 
     padding: 10px;
     cursor: pointer;
 
+  }
+
+  #reset {
     visibility: hidden;
   }
+
+/* Targets devices with a maximum width of 767px, typically mobile screens */
+@media (max-width: 767px) {
+
+.scorebar {
+    font-size: 24px;
+}
+
+.gridcell {
+    height: 16px;
+    width: 16px;
+  }
+  
+
+}
