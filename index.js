@@ -163,18 +163,31 @@ class SpawnManager {
 }
 
 class ScoreManager {
+
     constructor() {
         this.score = 0;
+        this.highscore = localStorage.getItem("highscore") || 0;
     }
 
     incrementScore() {
         this.score += 1;
+        this.save();
         this.renderScore();
     }
 
     renderScore() {
         const scoreElement = document.getElementById('score');
         scoreElement.innerHTML = `Score: ${this.score}`;
+
+        const highScoreElement = document.getElementById('highscore');
+        highScoreElement.innerHTML = `High Score: ${this.highscore}`;
+    }
+
+    save() {
+        if (this.highscore <= this.score) {
+            this.highscore = this.score;
+            localStorage.setItem("highscore", this.highscore);
+        }
     }
 
     reset() {
@@ -241,9 +254,8 @@ class GameLoop {
 
         if (ret === R_ERR_OPPOSITE_DIRECTION) { console.log("Opposite direction detected!"); }
         if (ret === R_ERR_HIT_BOUNDARY) { 
-            resetBtn.style.visibility = 'visible';
-            this.unmountLoop();
             console.log("Hit boundary!"); 
+            return this.gameEnd();
         }
 
         if (this.spawnManager.isSnakeColliding(this.snake)) {
@@ -251,6 +263,7 @@ class GameLoop {
             this.spawnManager.spawnNewFood(this.snake);
         }
 
+        this.scoreManager.save();
         this.snake.draw();
     }
 
@@ -275,6 +288,14 @@ class GameLoop {
 
         // Mount the tick loop inside the gameloop itself
         this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
+    }
+
+    gameEnd() {
+        // Why not lol
+        this.snake.draw();
+        this.scoreManager.save();
+        resetBtn.style.visibility = 'visible';
+        this.unmountLoop();
     }
 }
 
