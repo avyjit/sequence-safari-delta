@@ -2,6 +2,7 @@ const gridsize = 20;
 const TICK_INTERVAL_MS = 100;
 const STARTING_COUNTDOWN_TIMER = 10;
 const GAIN_PER_FOOD = 2;
+const crunch = new Audio("crunch.mp3");
 
 let grid = document.getElementById("gridbox");
 
@@ -287,6 +288,9 @@ class GameLoop {
         }
 
         if (this.spawnManager.isSnakeColliding(this.snake)) {
+            crunch.load();
+            crunch.play();
+            
             this.scoreManager.incrementScore();
             this.spawnManager.spawnNewFood(this.snake);
         }
