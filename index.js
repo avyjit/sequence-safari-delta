@@ -1,5 +1,7 @@
 const gridsize = 20;
-const TICK_INTERVAL_MS = 175;
+const TICK_INTERVAL_MS = 100;
+const STARTING_COUNTDOWN_TIMER = 10;
+const GAIN_PER_FOOD = 2;
 
 let grid = document.getElementById("gridbox");
 
@@ -167,12 +169,29 @@ class ScoreManager {
     constructor() {
         this.score = 0;
         this.highscore = localStorage.getItem("highscore") || 0;
+        this.countdown = STARTING_COUNTDOWN_TIMER;
+        this.interval = setInterval(() => this.decrementCountdown(), 1000);
+        this.renderScore();
     }
 
     incrementScore() {
-        this.score += 1;
+        this.score += this.countdown;
+        this.countdown += GAIN_PER_FOOD;
         this.save();
         this.renderScore();
+        this.renderCountdown();
+    }
+
+    decrementCountdown() {
+        if (this.countdown > 0) {
+            this.countdown -= 1;
+            this.renderCountdown();
+        }
+    }
+
+    renderCountdown() {
+        const countdownElement = document.getElementById('countdown');
+        countdownElement.innerHTML = `(${this.countdown})`;
     }
 
     renderScore() {
@@ -190,9 +209,20 @@ class ScoreManager {
         }
     }
 
+    unmountCountdownLoop() {
+        clearInterval(this.interval);
+    }
+
     reset() {
         this.score = 0;
         this.renderScore();
+        clearInterval(this.interval);
+        this.countdown = 15;
+        this.renderCountdown();
+    }
+
+    hasCountdownRunout() {
+        return this.countdown <= 0;
     }
 }
 
@@ -263,6 +293,11 @@ class GameLoop {
             this.spawnManager.spawnNewFood(this.snake);
         }
 
+        if (this.scoreManager.hasCountdownRunout()) {
+            console.log("Countdown runout!");
+            return this.gameEnd();
+        }
+
         this.scoreManager.save();
         this.snake.draw();
     }
@@ -294,6 +329,7 @@ class GameLoop {
         // Why not lol
         this.snake.draw();
         this.scoreManager.save();
+        this.scoreManager.unmountCountdownLoop();
         resetBtn.style.visibility = 'visible';
         this.unmountLoop();
     }
