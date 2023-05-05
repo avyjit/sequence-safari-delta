@@ -337,7 +337,12 @@ let loop = new GameLoop();
 const resetBtn = document.getElementById('reset');
 
 document.addEventListener('keydown', (event) => {
-    loop.handleClick(event);
+    if (event.key === 'Enter') {
+        loop.reset();
+        resetBtn.style.visibility = 'hidden';
+    } else {
+        loop.handleClick(event);
+    }
 });
 
 resetBtn.addEventListener('click', () => {
