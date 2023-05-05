@@ -1,4 +1,5 @@
 const gridsize = 20;
+const TICK_INTERVAL_MS = 175;
 
 let grid = document.getElementById("gridbox");
 
@@ -113,19 +114,84 @@ class Snake {
         return R_SNAKE_UPDATE_SUCCESSFUL;
     }
 
+    get head() {
+        return this.coords[0];
+    }
+
 }
 
 class SpawnManager {
     constructor() {
-        this.blocks = [];
+        this.currentFood = null;
+    }
+
+    isSnakeColliding(snake) {
+        if (this.currentFood === null || this.currentFood === undefined) return false;
+
+        for (let i=0; i < snake.coords.length; ++i) {
+            if (snake.coords[i][0] === this.currentFood[0] && snake.coords[i][1] === this.currentFood[1]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    spawnNewFood(snake) {
+        do {
+            this.currentFood = [Math.floor(Math.random() * gridsize), Math.floor(Math.random() * gridsize)];
+        } while (this.isSnakeColliding(snake));
+
+        this.renderFood();
+    }
+
+    renderFood() {
+        if (this.currentFood === null || this.currentFood === undefined) return;
+        const cell = document.getElementById(`cell_${this.currentFood[0]}_${this.currentFood[1]}`);
+        cell.className = 'gridcell food';
+    }
+
+    clearFood() {
+        if (this.currentFood === null || this.currentFood === undefined) return;
+        const cell = document.getElementById(`cell_${this.currentFood[0]}_${this.currentFood[1]}`);
+        cell.className = 'gridcell';
+        this.currentFood = null;
+    }
+
+
+
+}
+
+class ScoreManager {
+    constructor() {
+        this.score = 0;
+    }
+
+    incrementScore() {
+        this.score += 1;
+        this.renderScore();
+    }
+
+    renderScore() {
+        const scoreElement = document.getElementById('score');
+        scoreElement.innerHTML = `Score: ${this.score}`;
     }
 }
 
 class GameLoop {
     constructor() {
         this.snake = new Snake();
+        this.snake.draw();
+
         this.spawnManager = new SpawnManager();
+        this.spawnManager.spawnNewFood(this.snake);
+        this.spawnManager.renderFood();
+
+        this.scoreManager = new ScoreManager();
         this.queue = [];
+
+        // Mount the tick loop inside the gameloop itself
+        this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
     }
 
     handleClick(event) {
@@ -139,8 +205,13 @@ class GameLoop {
         // If the direction is opposite, we disregard this and don't push it into our key queue
         const dir = (key === 'ArrowUp') ? D_UP : (key === 'ArrowRight') ? D_RIGHT : (key === 'ArrowDown') ? D_DOWN : D_LEFT;
         if (this.snake.isOppositeDirection(dir)) {
-            console.log("[INFO] Disregarding opposite direction keypress from key queue");
-            return;
+            // FIX: Don't actually disregard this, because suppose the presses 2 keys,
+            // and the second key is the opposite to the current one, but the first key
+            // will change the direction of the snake, so it may actually not be opposite later
+            // so we kinda just ignore it and let `snake.updatePosition` handle it
+
+            // console.log("[INFO] Disregarding opposite direction keypress from key queue");
+            // return;
         }
 
         this.queue.unshift(event);
@@ -165,17 +236,23 @@ class GameLoop {
         }
 
         if (ret === R_ERR_OPPOSITE_DIRECTION) { console.log("Opposite direction detected!"); }
+        if (ret === R_ERR_HIT_BOUNDARY) { console.log("Hit boundary!"); }
+
+        if (this.spawnManager.isSnakeColliding(this.snake)) {
+            this.scoreManager.incrementScore();
+            this.spawnManager.spawnNewFood(this.snake);
+        }
+        
         this.snake.draw();
     }
 }
 
-// let snake = new Snake();
 let loop = new GameLoop();
 
 document.addEventListener('keydown', (event) => {
     loop.handleClick(event);
 });
 
-let interval = setInterval(() => {
-    loop.tick();
-}, 375);
+// let interval = setInterval(() => {
+//     loop.tick();
+// }, TICK_INTERVAL_MS);
