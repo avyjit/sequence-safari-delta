@@ -176,6 +176,11 @@ class ScoreManager {
         const scoreElement = document.getElementById('score');
         scoreElement.innerHTML = `Score: ${this.score}`;
     }
+
+    reset() {
+        this.score = 0;
+        this.renderScore();
+    }
 }
 
 class GameLoop {
@@ -185,7 +190,6 @@ class GameLoop {
 
         this.spawnManager = new SpawnManager();
         this.spawnManager.spawnNewFood(this.snake);
-        this.spawnManager.renderFood();
 
         this.scoreManager = new ScoreManager();
         this.queue = [];
@@ -236,7 +240,11 @@ class GameLoop {
         }
 
         if (ret === R_ERR_OPPOSITE_DIRECTION) { console.log("Opposite direction detected!"); }
-        if (ret === R_ERR_HIT_BOUNDARY) { console.log("Hit boundary!"); }
+        if (ret === R_ERR_HIT_BOUNDARY) { 
+            resetBtn.style.visibility = 'visible';
+            this.unmountLoop();
+            console.log("Hit boundary!"); 
+        }
 
         if (this.spawnManager.isSnakeColliding(this.snake)) {
             this.scoreManager.incrementScore();
@@ -245,12 +253,41 @@ class GameLoop {
 
         this.snake.draw();
     }
+
+    unmountLoop() {
+        clearInterval(this.interval);
+    }
+
+    reset() {
+        this.unmountLoop();
+        this.snake.clear();
+        this.spawnManager.clearFood();
+        this.scoreManager.reset();
+
+        this.snake = new Snake();
+        this.snake.draw();
+
+        this.spawnManager = new SpawnManager();
+        this.spawnManager.spawnNewFood(this.snake);
+
+        this.scoreManager = new ScoreManager();
+        this.queue = [];
+
+        // Mount the tick loop inside the gameloop itself
+        this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
+    }
 }
 
 let loop = new GameLoop();
+const resetBtn = document.getElementById('reset');
 
 document.addEventListener('keydown', (event) => {
     loop.handleClick(event);
+});
+
+resetBtn.addEventListener('click', () => {
+    loop.reset();
+    resetBtn.style.visibility = 'hidden';
 });
 
 // let interval = setInterval(() => {
