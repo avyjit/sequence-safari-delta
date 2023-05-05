@@ -23,7 +23,7 @@ function defaultSnakePosition() {
     const midx = Math.floor(gridsize / 2);
     const midy = midx;
 
-    const snake = [[midx-1, midy], [midx, midy], [midx+1, midy]];
+    const snake = [[midx+1, midy], [midx, midy], [midx-1, midy]];
     return snake;
 }
 
@@ -46,21 +46,21 @@ const R_ERR_OPPOSITE_DIRECTION = 1;
 let direction = D_DOWN;
 let snake = defaultSnakePosition();
 
-function updateSnakePosition(direction, old_direction) {
+function updateSnakePosition(new_direction, old_direction) {
     const head = snake[0];
     let newHead = [head[0], head[1]];
 
     // Check if the snake is going in the opposite direction
     if (
-        (direction === D_UP && old_direction === D_DOWN) 
-        || (direction === D_DOWN && old_direction === D_UP)
-        || (direction === D_LEFT && old_direction === D_RIGHT)
-        || (direction === D_RIGHT && old_direction === D_LEFT)
+        (new_direction === D_UP && old_direction === D_DOWN) 
+        || (new_direction === D_DOWN && old_direction === D_UP)
+        || (new_direction === D_LEFT && old_direction === D_RIGHT)
+        || (new_direction === D_RIGHT && old_direction === D_LEFT)
     ) {
         return R_ERR_OPPOSITE_DIRECTION;
     }
 
-    switch (direction) {
+    switch (new_direction) {
         case D_UP: newHead[0] -= 1; break;
         case D_RIGHT: newHead[1] += 1; break;
         case D_DOWN: newHead[0] += 1; break;
@@ -81,6 +81,8 @@ function clearCurrentSnake() {
 
 drawSnake();
 
+
+
 document.addEventListener('keydown', (event) => {
     const keyName = event.key;
     let newDirection = direction;
@@ -95,8 +97,10 @@ document.addEventListener('keydown', (event) => {
     }
 
     clearCurrentSnake();
-    updateSnakePosition(newDirection, direction);
+    const ret = updateSnakePosition(newDirection, direction);
     drawSnake();
 
-    direction = newDirection;
+    if (ret !== R_ERR_OPPOSITE_DIRECTION && wasDirectionChanged) {
+        direction = newDirection;
+    }
 });
