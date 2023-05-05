@@ -242,7 +242,7 @@ class GameLoop {
             this.scoreManager.incrementScore();
             this.spawnManager.spawnNewFood(this.snake);
         }
-        
+
         this.snake.draw();
     }
 }
