@@ -28,3 +28,7 @@
     height: 32px;
     width: 32px;
   }
+
+  .snake {
+    background-color: green;
+  }
