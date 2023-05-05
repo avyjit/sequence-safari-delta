@@ -334,6 +334,7 @@ class GameLoop {
 }
 
 let loop = new GameLoop();
+document.getElementById('countdown').innerHTML = `(${STARTING_COUNTDOWN_TIMER})`;
 const resetBtn = document.getElementById('reset');
 
 document.addEventListener('keydown', (event) => {
