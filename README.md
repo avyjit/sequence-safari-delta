@@ -28,7 +28,7 @@ See the demo [here](https://avyjit.github.io/sequence-safari-delta/).
 -  [x] If the snake eats itself, the game ends
 -  [x] As time progresses, make the snake move faster
 -  [ ] Implement power-ups that spawn randomly and gain buffs on eating them, such as shrinking the snake and slowing it down
--  [ ] Implement a pause button.
+-  [x] Implement a pause button.
 -  [x] Implement sound on snake-eating word
 -  [ ] Implement variable grid size as per player request
 -  [ ] Replace color blocks with letters and words to be eaten in the correct sequence
