@@ -1,13 +1,13 @@
 const gridsize = 20;
-const TICK_INTERVAL_MS = 150;
 const STARTING_COUNTDOWN_TIMER = 12;
 const GAIN_PER_COLLISION = 2;
 const crunch = new Audio("crunch.mp3");
 const wordLvls = [
-    ['map'],
-    ['byte'],
-    ['stack'],
-    ['binary']
+    ['map', 'int', 'net', 'cpu', 'sql'],
+    ['byte', 'void', 'code', 'bios'],
+    ['stack', 'login', 'pixel', 'swift', 'mutex'],
+    ['binary', 'python'],
+    ['algorithm']
 ]
 
 const pauseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -25,8 +25,8 @@ const resumeSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabl
 // i.e if current score is < 50 -> lvl 0
 // if current score is between 50 and 125 lvl 1
 // and so on
-const levelThresholds = [25,              50,   75, 100, 125, 150, 175, 200, 225, 250];
-const levelTickTimes = [TICK_INTERVAL_MS, 137, 125, 112, 100,  87,  75,  67,  50,  37];
+const levelThresholds = [25,  50,  75, 100, 125, 150, 175, 200, 225, 250];
+const levelTickTimes = [150, 137, 125, 112, 100,  87,  75,  67,  50,  37];
 
 let grid = document.getElementById("gridbox");
 
