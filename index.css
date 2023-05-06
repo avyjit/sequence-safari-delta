@@ -82,6 +82,12 @@
     border-radius: 50%;
   }
 
+  .wordholder {
+    display: flex;
+    justify-content: space-around;
+    font-size: 48px;
+  }
+
 /* Targets devices with a maximum width of 767px, typically mobile screens */
 @media (max-width: 767px) {
 
@@ -96,4 +102,11 @@
   }
 
 
+}
+
+@media (max-height: 820px) {
+  .gridcell {
+    height: 20px;
+    width: 20px;
+  }
 }

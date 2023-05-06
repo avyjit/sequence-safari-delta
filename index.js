@@ -3,6 +3,12 @@ const TICK_INTERVAL_MS = 150;
 const STARTING_COUNTDOWN_TIMER = 12;
 const GAIN_PER_FOOD = 2;
 const crunch = new Audio("crunch.mp3");
+const wordLvls = [
+    ['map'],
+    ['byte'],
+    ['stack'],
+    ['binary']
+]
 
 const pauseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
 <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -205,7 +211,7 @@ class SpawnManager {
     constructor() {
         this.currentFood = null;
         this.word = "trichy";
-        this.curIndex = 0;
+        this.wordLvl = 0;
         this.wordCoords = [];
     }
 
@@ -244,6 +250,8 @@ class SpawnManager {
     }
 
     spawnNewWord(snake) {
+        this.word = chooseAtRandom(wordLvls[this.wordLvl]);
+        this.wordLvl = ((this.wordLvl+1) < wordLvls.length) ? (this.wordLvl+1) : this.wordLvl;
         let word = this.word.toUpperCase();
         let coord;
         for (let i=0; i < word.length; ++i) {
@@ -282,6 +290,8 @@ class SpawnManager {
             const cell = getCellAtCoord(coord);
             cell.innerText = word[i];
         }
+
+        document.getElementById('currentWord').innerText = word;
     }
 
     clearWord() {
@@ -384,7 +394,7 @@ class GameLoop {
         this.snake.draw();
 
         this.spawnManager = new SpawnManager();
-        this.spawnManager.spawnNewFood(this.snake);
+        // this.spawnManager.spawnNewFood(this.snake);
         this.spawnManager.spawnNewWord(this.snake);
         this.spawnManager.renderWordAfterSpawn();
 
@@ -451,13 +461,13 @@ class GameLoop {
             return this.gameEnd();
         }
 
-        if (this.spawnManager.isSnakeColliding(this.snake)) {
-            crunch.load();
-            crunch.play();
-            this.snake.grow();
-            this.scoreManager.incrementScore();
-            this.spawnManager.spawnNewFood(this.snake);
-        }
+        // if (this.spawnManager.isSnakeColliding(this.snake)) {
+        //     crunch.load();
+        //     crunch.play();
+        //     this.snake.grow();
+        //     this.scoreManager.incrementScore();
+        //     this.spawnManager.spawnNewFood(this.snake);
+        // }
 
         let smRet = this.spawnManager.isSnakeColliding2(this.snake);
         if (smRet === SM_CORRECT_INDEX) {
@@ -492,7 +502,7 @@ class GameLoop {
     reset() {
         this.unmountLoop();
         this.snake.clear();
-        this.spawnManager.clearFood();
+        // this.spawnManager.clearFood();
         this.spawnManager.clearWord();
         this.scoreManager.reset();
 
@@ -500,7 +510,7 @@ class GameLoop {
         this.snake.draw();
 
         this.spawnManager = new SpawnManager();
-        this.spawnManager.spawnNewFood(this.snake);
+        // this.spawnManager.spawnNewFood(this.snake);
         this.spawnManager.spawnNewWord(this.snake);
         this.spawnManager.renderWordAfterSpawn();
 
