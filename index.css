@@ -62,10 +62,18 @@
     padding: 10px;
     cursor: pointer;
 
+    display: flex;
+    align-items: center;
+
   }
 
   #reset {
     visibility: hidden;
+  }
+
+
+  .round {
+    border-radius: 50%;
   }
 
 /* Targets devices with a maximum width of 767px, typically mobile screens */
