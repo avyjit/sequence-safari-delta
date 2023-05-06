@@ -1,7 +1,7 @@
 const gridsize = 20;
 const TICK_INTERVAL_MS = 150;
 const STARTING_COUNTDOWN_TIMER = 12;
-const GAIN_PER_FOOD = 2;
+const GAIN_PER_COLLISION = 2;
 const crunch = new Audio("crunch.mp3");
 const wordLvls = [
     ['map'],
@@ -209,44 +209,9 @@ const SM_INCORRECT_INDEX = 2;
 class SpawnManager { 
 
     constructor() {
-        this.currentFood = null;
-        this.word = "trichy";
+        this.word = "";
         this.wordLvl = 0;
         this.wordCoords = [];
-    }
-
-    isSnakeColliding(snake) {
-        if (this.currentFood === null || this.currentFood === undefined) return false;
-
-        for (let i=0; i < snake.coords.length; ++i) {
-            if (snake.coords[i][0] === this.currentFood[0] && snake.coords[i][1] === this.currentFood[1]) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    spawnNewFood(snake) {
-        // Keep on retrying random points till we find a point that doesn't collide with the snake
-        do {
-            this.currentFood = [Math.floor(Math.random() * gridsize), Math.floor(Math.random() * gridsize)];
-        } while (snake.isGonnaCollide(this.currentFood));
-
-        this.renderFood();
-    }
-
-    renderFood() {
-        if (this.currentFood === null || this.currentFood === undefined) return;
-        const cell = getCellAtCoord(this.currentFood);
-        cell.className = 'gridcell food';
-    }
-
-    clearFood() {
-        if (this.currentFood === null || this.currentFood === undefined) return;
-        const cell = getCellAtCoord(this.currentFood);
-        cell.className = 'gridcell';
-        this.currentFood = null;
     }
 
     spawnNewWord(snake) {
@@ -262,7 +227,7 @@ class SpawnManager {
         }
     }
     
-    isSnakeColliding2(snake) {
+    isSnakeColliding(snake) {
         const head = snake.head;
         const index = indexOf(this.wordCoords, head);
         if (index === -1) {
@@ -318,7 +283,7 @@ class ScoreManager {
 
     incrementScore() {
         this.score += this.countdown;
-        this.countdown += GAIN_PER_FOOD;
+        this.countdown += GAIN_PER_COLLISION;
         this.save();
         this.renderScore();
         this.renderCountdown();
@@ -394,7 +359,6 @@ class GameLoop {
         this.snake.draw();
 
         this.spawnManager = new SpawnManager();
-        // this.spawnManager.spawnNewFood(this.snake);
         this.spawnManager.spawnNewWord(this.snake);
         this.spawnManager.renderWordAfterSpawn();
 
@@ -461,15 +425,7 @@ class GameLoop {
             return this.gameEnd();
         }
 
-        // if (this.spawnManager.isSnakeColliding(this.snake)) {
-        //     crunch.load();
-        //     crunch.play();
-        //     this.snake.grow();
-        //     this.scoreManager.incrementScore();
-        //     this.spawnManager.spawnNewFood(this.snake);
-        // }
-
-        let smRet = this.spawnManager.isSnakeColliding2(this.snake);
+        let smRet = this.spawnManager.isSnakeColliding(this.snake);
         if (smRet === SM_CORRECT_INDEX) {
             crunch.load();
             crunch.play();
@@ -502,7 +458,6 @@ class GameLoop {
     reset() {
         this.unmountLoop();
         this.snake.clear();
-        // this.spawnManager.clearFood();
         this.spawnManager.clearWord();
         this.scoreManager.reset();
 
@@ -510,7 +465,6 @@ class GameLoop {
         this.snake.draw();
 
         this.spawnManager = new SpawnManager();
-        // this.spawnManager.spawnNewFood(this.snake);
         this.spawnManager.spawnNewWord(this.snake);
         this.spawnManager.renderWordAfterSpawn();
 
