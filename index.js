@@ -175,6 +175,7 @@ class SpawnManager {
     }
 
     spawnNewFood(snake) {
+        // Keep on retrying random points till we find a point that doesn't collide with the snake
         do {
             this.currentFood = [Math.floor(Math.random() * gridsize), Math.floor(Math.random() * gridsize)];
         } while (this.isSnakeColliding(snake));
@@ -267,6 +268,10 @@ class ScoreManager {
             }
         }
 
+        // If the current score is greater than the last threshold,
+        // the player will just stay at the last level.
+        // Eg: if the last score threshold is 250, and the player's
+        // current score is 277, it still counts as the last level
         return levelThresholds.length - 1;
     }
 }
@@ -393,8 +398,13 @@ class GameLoop {
     }
 
     gameEnd() {
-        // Why not lol
+        // Render snake here because `tick` early returns
+        // upon any error likE R_ERR_HIT_BOUNDARY or R_ERR_EAT_ITSELF
+        // and doesn't call this.snake.draw() at the end of tick
+        // This causes the snake to disappear, which looks a bit jarring
+        // so we draw it inside here to make it not disappear suddenly
         this.snake.draw();
+
         this.scoreManager.save();
         this.scoreManager.unmountCountdownLoop();
         resetBtn.style.visibility = 'visible';
@@ -407,6 +417,7 @@ document.getElementById('countdown').innerHTML = `(${STARTING_COUNTDOWN_TIMER})`
 const resetBtn = document.getElementById('reset');
 
 document.addEventListener('keydown', (event) => {
+    // Add Enter key as reset for debugging puproses
     if (event.key === 'Enter') {
         loop.reset();
         resetBtn.style.visibility = 'hidden';
