@@ -24,7 +24,7 @@
 -  [ ] Implement a lives system: when a snake dies, it loses a life. When all the lives are depleted, the game ends
 -  [x] On completing a sequence of blocks, the snake grows in size
 -  [x] If the snake eats itself, the game ends
--  [ ] As time progresses, make the snake move faster
+-  [x] As time progresses, make the snake move faster
 -  [ ] Implement power-ups that spawn randomly and gain buffs on eating them, such as shrinking the snake and slowing it down
 -  [ ] Implement a pause button.
 -  [x] Implement sound on snake-eating word
