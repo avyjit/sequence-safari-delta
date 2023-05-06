@@ -41,19 +41,6 @@ for (let i=0; i < gridsize; ++i) {
 }
 
 
-function defaultSnakePosition() {
-    const midx = Math.floor(gridsize / 2);
-    const midy = midx;
-
-    // It's important that midx+1 is at the front of the array, 
-    // because that's the head of the snake
-    // and we are setting the direction to D_DOWN by default
-    // so the head has to be at the bottom of the grid
-    const snake = [[midx+1, midy], [midx, midy], [midx-1, midy]];
-
-    return snake;
-}
-
 
 
 const D_UP = 0;
@@ -68,6 +55,50 @@ const R_SNAKE_UPDATE_SUCCESSFUL = 2;
 const R_ERR_HIT_BOUNDARY = 3;
 const R_ERR_EAT_ITSELF = 4;
 
+// --------------------------- Utils -------------------------------
+function defaultSnakePosition() {
+    const midx = Math.floor(gridsize / 2);
+    const midy = midx;
+
+    // It's important that midx+1 is at the front of the array, 
+    // because that's the head of the snake
+    // and we are setting the direction to D_DOWN by default
+    // so the head has to be at the bottom of the grid
+    const snake = [[midx+1, midy], [midx, midy], [midx-1, midy]];
+
+    return snake;
+}
+
+function contains(arr, coord) {
+    for (let i=0; i < arr.length; ++i) {
+        if (arr[i][0] === coord[0] && arr[i][1] === coord[1]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function indexOf(arr, coord) {
+    for (let i=0; i < arr.length; ++i) {
+        if (arr[i][0] === coord[0] && arr[i][1] === coord[1]) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+function getCellAtCoord(coord) {
+    return document.getElementById(`cell_${coord[0]}_${coord[1]}`);
+}
+
+function chooseAtRandom(arr) {
+    let i = Math.floor(arr.length * Math.random());
+    return arr[i];
+}
+// -----------------------------------------------------------------
+
 class Snake {
     constructor() {
         this.coords = defaultSnakePosition();
@@ -77,14 +108,14 @@ class Snake {
 
     clear() {
         for (let i=0; i < this.coords.length; ++i) {
-            const cell = document.getElementById(`cell_${this.coords[i][0]}_${this.coords[i][1]}`);
+            const cell = getCellAtCoord(this.coords[i]);
             cell.className = 'gridcell';
         }
     }
 
     draw() {
         for (let i=0; i < this.coords.length; ++i) {
-            const cell = document.getElementById(`cell_${this.coords[i][0]}_${this.coords[i][1]}`);
+            const cell = getCellAtCoord(this.coords[i]);
             cell.className = 'gridcell snake';
         }
     }
@@ -156,21 +187,26 @@ class Snake {
     }
 
     isGonnaEatItself(newHead) {
-        for (let i=0; i < this.coords.length; ++i) {
-            if (this.coords[i][0] === newHead[0] && this.coords[i][1] === newHead[1]) {
-                return true;
-            }
-        }
+        return this.isGonnaCollide(newHead)
+    }
 
-        return false;
-
+    isGonnaCollide(coord) {
+        return contains(this.coords, coord);
     }
 
 }
 
-class SpawnManager {
+const SM_NO_COLLISION = 0;
+const SM_CORRECT_INDEX = 1;
+const SM_INCORRECT_INDEX = 2;
+
+class SpawnManager { 
+
     constructor() {
         this.currentFood = null;
+        this.word = "trichy";
+        this.curIndex = 0;
+        this.wordCoords = [];
     }
 
     isSnakeColliding(snake) {
@@ -189,23 +225,72 @@ class SpawnManager {
         // Keep on retrying random points till we find a point that doesn't collide with the snake
         do {
             this.currentFood = [Math.floor(Math.random() * gridsize), Math.floor(Math.random() * gridsize)];
-        } while (this.isSnakeColliding(snake));
+        } while (snake.isGonnaCollide(this.currentFood));
 
         this.renderFood();
     }
 
     renderFood() {
         if (this.currentFood === null || this.currentFood === undefined) return;
-        const cell = document.getElementById(`cell_${this.currentFood[0]}_${this.currentFood[1]}`);
+        const cell = getCellAtCoord(this.currentFood);
         cell.className = 'gridcell food';
     }
 
     clearFood() {
         if (this.currentFood === null || this.currentFood === undefined) return;
-        const cell = document.getElementById(`cell_${this.currentFood[0]}_${this.currentFood[1]}`);
+        const cell = getCellAtCoord(this.currentFood);
         cell.className = 'gridcell';
         this.currentFood = null;
     }
+
+    spawnNewWord(snake) {
+        let word = this.word.toUpperCase();
+        let coord;
+        for (let i=0; i < word.length; ++i) {
+            do {
+                coord = [Math.floor(Math.random() * gridsize), Math.floor(Math.random() * gridsize)];
+            } while (snake.isGonnaCollide(coord) || contains(this.wordCoords, coord));
+            this.wordCoords.push(coord);
+        }
+    }
+    
+    isSnakeColliding2(snake) {
+        const head = snake.head;
+        const index = indexOf(this.wordCoords, head);
+        if (index === -1) {
+            return SM_NO_COLLISION;
+        } else if (index !== 0) {
+            return SM_INCORRECT_INDEX;
+        } else {
+            const letter = this.wordCoords.shift();
+            const cell = getCellAtCoord(letter);
+            cell.innerText = '';
+
+            if (this.wordCoords.length === 0) {
+                this.spawnNewWord(snake);
+                this.renderWordAfterSpawn();
+            }
+
+            return SM_CORRECT_INDEX;
+        }
+
+    }
+    renderWordAfterSpawn() {
+        let word = this.word.toUpperCase();
+        for (let i=0; i<word.length; ++i) {
+            const coord = this.wordCoords[i];
+            const cell = getCellAtCoord(coord);
+            cell.innerText = word[i];
+        }
+    }
+
+    clearWord() {
+        for (let coord of this.wordCoords) {
+            const cell = getCellAtCoord(coord);
+            cell.innerText = '';
+        }
+    }
+
 
 
 
@@ -300,6 +385,8 @@ class GameLoop {
 
         this.spawnManager = new SpawnManager();
         this.spawnManager.spawnNewFood(this.snake);
+        this.spawnManager.spawnNewWord(this.snake);
+        this.spawnManager.renderWordAfterSpawn();
 
         this.scoreManager = new ScoreManager();
         this.queue = [];
@@ -372,6 +459,16 @@ class GameLoop {
             this.spawnManager.spawnNewFood(this.snake);
         }
 
+        let smRet = this.spawnManager.isSnakeColliding2(this.snake);
+        if (smRet === SM_CORRECT_INDEX) {
+            crunch.load();
+            crunch.play();
+            this.snake.grow();
+            this.scoreManager.incrementScore();
+        } else if (smRet === SM_INCORRECT_INDEX) {
+            this.gameEnd();
+        }
+
         if (this.scoreManager.hasCountdownRunout()) {
             console.log("Countdown runout!");
             return this.gameEnd();
@@ -396,6 +493,7 @@ class GameLoop {
         this.unmountLoop();
         this.snake.clear();
         this.spawnManager.clearFood();
+        this.spawnManager.clearWord();
         this.scoreManager.reset();
 
         this.snake = new Snake();
@@ -403,6 +501,8 @@ class GameLoop {
 
         this.spawnManager = new SpawnManager();
         this.spawnManager.spawnNewFood(this.snake);
+        this.spawnManager.spawnNewWord(this.snake);
+        this.spawnManager.renderWordAfterSpawn();
 
         this.scoreManager = new ScoreManager();
         this.queue = [];
