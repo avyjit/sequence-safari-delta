@@ -1,4 +1,4 @@
-# Safari Sequence
+# Sequence Safari
 See the demo [here](https://avyjit.github.io/sequence-safari-delta/).
 
 ### Game Logic
