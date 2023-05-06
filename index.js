@@ -1,8 +1,15 @@
 const gridsize = 20;
-const TICK_INTERVAL_MS = 100;
-const STARTING_COUNTDOWN_TIMER = 10;
+const TICK_INTERVAL_MS = 150;
+const STARTING_COUNTDOWN_TIMER = 12;
 const GAIN_PER_FOOD = 2;
 const crunch = new Audio("crunch.mp3");
+
+// Score thresholds for next level
+// i.e if current score is < 50 -> lvl 0
+// if current score is between 50 and 125 lvl 1
+// and so on
+const levelThresholds = [25,              50,   75, 100, 125, 150, 175, 200, 225, 250];
+const levelTickTimes = [TICK_INTERVAL_MS, 137, 125, 112, 100,  87,  75,  67,  50,  37];
 
 let grid = document.getElementById("gridbox");
 
@@ -252,6 +259,16 @@ class ScoreManager {
     hasCountdownRunout() {
         return this.countdown <= 0;
     }
+
+    getLevel() {
+        for (let i=0; i<levelThresholds.length; ++i) {
+            if (this.score <= levelThresholds[i]) {
+                return i;
+            }
+        }
+
+        return levelThresholds.length - 1;
+    }
 }
 
 class GameLoop {
@@ -267,6 +284,7 @@ class GameLoop {
 
         // Mount the tick loop inside the gameloop itself
         this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
+        this.currentLevel = 0
     }
 
     handleClick(event) {
@@ -332,6 +350,13 @@ class GameLoop {
             return this.gameEnd();
         }
 
+        const scoreLevel = this.scoreManager.getLevel();
+        if (this.currentLevel != scoreLevel) {
+            console.log(`Entering new level: ${scoreLevel}`);
+            this.mountWithInterval(levelTickTimes[scoreLevel]);
+            this.currentLevel = scoreLevel;
+        }
+
         this.scoreManager.save();
         this.snake.draw();
     }
@@ -357,6 +382,14 @@ class GameLoop {
 
         // Mount the tick loop inside the gameloop itself
         this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
+    }
+
+    mountWithInterval(interval_ms) {
+        // First clear the existing interval to avoid any 
+        // double counting issues
+        this.unmountLoop();
+
+        this.interval = setInterval(this.tick.bind(this), interval_ms);
     }
 
     gameEnd() {
