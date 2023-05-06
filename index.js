@@ -4,6 +4,17 @@ const STARTING_COUNTDOWN_TIMER = 12;
 const GAIN_PER_FOOD = 2;
 const crunch = new Audio("crunch.mp3");
 
+const pauseSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-pause" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+<rect x="6" y="5" width="4" height="14" rx="1" />
+<rect x="14" y="5" width="4" height="14" rx="1" />
+</svg>`;
+
+const resumeSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-player-play" width="44" height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+<path d="M7 4v16l13 -8z" />
+</svg>`;
+
 // Score thresholds for next level
 // i.e if current score is < 50 -> lvl 0
 // if current score is between 50 and 125 lvl 1
@@ -249,10 +260,16 @@ class ScoreManager {
         clearInterval(this.interval);
     }
 
+    remountCountdownLoop() {
+        clearInterval(this.interval);
+        this.interval = setInterval(() => this.decrementCountdown(), 1000);
+
+    }
+
     reset() {
         this.score = 0;
         this.renderScore();
-        clearInterval(this.interval);
+        this.unmountCountdownLoop();
         this.countdown = STARTING_COUNTDOWN_TIMER;
         this.renderCountdown();
     }
@@ -288,8 +305,10 @@ class GameLoop {
         this.queue = [];
 
         // Mount the tick loop inside the gameloop itself
-        this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
         this.currentLevel = 0
+        this.mountWithInterval(levelTickTimes[this.currentLevel]);
+        this.isPaused = false;
+        this.gameEnded = false;
     }
 
     handleClick(event) {
@@ -312,14 +331,17 @@ class GameLoop {
             // return;
         }
 
+        if (this.isPaused) return;
         this.queue.unshift(dir);
     }
 
     addDirectionToQueue(dir) {
+        if (this.isPaused) return;
         this.queue.unshift(dir);
     }
 
     tick() {
+        this.gameEnded = false;
         this.snake.clear();
         let ret;
 
@@ -386,7 +408,13 @@ class GameLoop {
         this.queue = [];
 
         // Mount the tick loop inside the gameloop itself
-        this.interval = setInterval(this.tick.bind(this), TICK_INTERVAL_MS);
+        this.currentLevel = 0;
+        this.mountWithInterval(levelTickTimes[this.currentLevel]);
+
+
+        this.isPaused = false;
+        resetPauseButton();
+
     }
 
     mountWithInterval(interval_ms) {
@@ -397,12 +425,34 @@ class GameLoop {
         this.interval = setInterval(this.tick.bind(this), interval_ms);
     }
 
+    pauseOrResume() {
+        if (this.gameEnded) {
+            console.log("[INFO] Early exit from pause because game already ended.");
+            return R_ERR;
+        }
+
+        console.log("[INFO] Inside pauseOrResume");
+        if (this.isPaused) {
+            this.isPaused = false;
+            this.mountWithInterval(levelTickTimes[this.currentLevel]);
+            this.scoreManager.remountCountdownLoop();
+        } else {
+            this.isPaused = true;
+            this.unmountLoop();
+            this.scoreManager.unmountCountdownLoop();
+        }
+
+        return R_OK;
+
+    }
+
     gameEnd() {
         // Render snake here because `tick` early returns
         // upon any error likE R_ERR_HIT_BOUNDARY or R_ERR_EAT_ITSELF
         // and doesn't call this.snake.draw() at the end of tick
         // This causes the snake to disappear, which looks a bit jarring
         // so we draw it inside here to make it not disappear suddenly
+        this.gameEnded = true;
         this.snake.draw();
 
         this.scoreManager.save();
@@ -414,7 +464,13 @@ class GameLoop {
 
 let loop = new GameLoop();
 document.getElementById('countdown').innerHTML = `(${STARTING_COUNTDOWN_TIMER})`;
+
+
 const resetBtn = document.getElementById('reset');
+const pauseBtn = document.getElementById('pause');
+
+pauseBtn.innerHTML = pauseSvg;
+pauseBtn.currentSvg = 'pauseSvg';
 
 document.addEventListener('keydown', (event) => {
     // Add Enter key as reset for debugging puproses
@@ -429,6 +485,32 @@ document.addEventListener('keydown', (event) => {
 resetBtn.addEventListener('click', () => {
     loop.reset();
     resetBtn.style.visibility = 'hidden';
+});
+
+function togglePauseButton() {
+
+    if (pauseBtn.currentSvg === 'pauseSvg') {
+        pauseBtn.innerHTML = resumeSvg;
+        pauseBtn.currentSvg = 'resumeSvg';
+    } else if (pauseBtn.currentSvg === 'resumeSvg') {
+        pauseBtn.innerHTML = pauseSvg;
+        pauseBtn.currentSvg = 'pauseSvg';
+    } else {
+        console.log("[FATAL] Should never reach here in togglePauseButton");
+    }
+
+}
+
+function resetPauseButton() {
+    pauseBtn.innerHTML = pauseSvg;
+    pauseBtn.currentSvg = 'pauseSvg';
+}
+
+pauseBtn.addEventListener('click', () => {
+    console.log("[EVENT] Clicked on pause button");
+    let ret = loop.pauseOrResume();
+
+    if (ret === R_OK) togglePauseButton();
 });
 
 // On screen controls for mobile users

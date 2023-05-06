@@ -35,8 +35,8 @@
 .gridcell {
     /* border: 1px solid black; */
     background-color: black;
-    height: 32px;
-    width: 32px;
+    height: 26px;
+    width: 26px;
   }
 
   .snake {
@@ -50,6 +50,7 @@
   .btn-container {
     display: flex;
     justify-content: space-around;
+    margin: 0px;
   }
 
   .btn {
