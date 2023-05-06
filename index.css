@@ -39,6 +39,9 @@
     color: aquamarine;
     height: 26px;
     width: 26px;
+
+    font-size: 25px;
+    font-family:'Courier New', Courier, monospace
   }
 
   .snake {
@@ -85,7 +88,10 @@
   .wordholder {
     display: flex;
     justify-content: space-around;
+
     font-size: 48px;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    
   }
 
 /* Targets devices with a maximum width of 767px, typically mobile screens */
@@ -99,6 +105,7 @@
 .gridcell {
     height: 16px;
     width: 16px;
+    font-size: 15px;
   }
 
 
@@ -108,5 +115,6 @@
   .gridcell {
     height: 20px;
     width: 20px;
+    font-size: 19px;
   }
 }

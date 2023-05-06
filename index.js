@@ -2,6 +2,7 @@ const gridsize = 20;
 const STARTING_COUNTDOWN_TIMER = 12;
 const GAIN_PER_COLLISION = 2;
 const crunch = new Audio("crunch.mp3");
+const onDeathSound = new Audio("bruh.mp3");
 const wordLvls = [
     ['map', 'int', 'net', 'cpu', 'sql'],
     ['byte', 'void', 'code', 'bios'],
@@ -511,6 +512,9 @@ class GameLoop {
     }
 
     gameEnd() {
+        onDeathSound.load();
+        onDeathSound.play();
+
         // Render snake here because `tick` early returns
         // upon any error likE R_ERR_HIT_BOUNDARY or R_ERR_EAT_ITSELF
         // and doesn't call this.snake.draw() at the end of tick
