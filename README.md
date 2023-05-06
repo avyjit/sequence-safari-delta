@@ -1,4 +1,6 @@
 # Safari Sequence
+See the demo [here](https://avyjit.github.io/sequence-safari-delta/).
+
 ### Game Logic
 -   The game comprises a grid where the user controls a snake and moves around the map
 -   There will be items scattered across the map which the snake can eat
